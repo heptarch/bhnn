@@ -1,0 +1,104 @@
+% ============================================================== APPENDICES
+\section{Reproducing these notes}\label{app:repro}
+
+Everything is pure Python (numpy, scipy, matplotlib, msgpack); no GPU, no deep-learning framework. On a 2-core
+machine the full pipeline takes about two hours, dominated by E11, E13 and the RoBERTa linear programs in E03.
+
+\begin{center}\small
+\resizebox{\linewidth}{!}{\begin{tabular}{@{}lll@{}}\toprule
+step & command & output \\\midrule
+gradient check & \file{python -m tests.test\_gradients} & stdout \\
+fetch weights & \file{bash scripts/fetch\_weights.sh} & \file{data/} \\
+E01 exact moments & \file{python -m experiments.e01\_haar\_moments} & \file{results/e01\_*.json} \\
+E02 toy models & \file{python -m experiments.e02\_tms\_vs\_haar} & \file{results/e02\_*} \\
+E03 embeddings & \file{python -m experiments.e03\_real\_embeddings} & \file{results/e03\_*.json} \\
+E03 coherent pairs & \file{python -I scripts/e03\_top\_pairs.py} & \file{results/e03\_top\_pairs.json} \\
+E10 drift conditions & \file{python -m experiments.e10\_drift\_conditions} & \file{results/e10\_*.json} \\
+E11 optimizers & \file{python -m experiments.e11\_optimizers} & \file{results/e11\_*.json} \\
+E11 packing & \file{python -m experiments.e11\_packing} & \file{results/e11\_packing.json} \\
+E13 saddle Hessian & \file{python -m experiments.e13\_saddle\_hessian} & \file{results/e13\_*.json} \\
+E13 fresh-noise check & \file{python -m experiments.e13\_fresh} & \file{results/e13\_fresh.json} \\
+E14 handshake toy & \file{python -m experiments.e14\_bilinear\_handshake} & \file{results/e14\_*.json} \\
+E15 forces in superposition & \file{python -m experiments.e15\_superposition\_forces} & \file{results/e15\_*.json} \\
+figures, tables & \file{python scripts/make\_figures.py; python scripts/make\_tables.py} & \file{notes/figs, notes/tables} \\
+\bottomrule\end{tabular}}
+\end{center}
+
+{\sloppy\emph{Data.} RoBERTa-base token embeddings come from spaCy's \file{en\_core\_web\_trf-3.8.0} wheel (GitHub release
+\file{explosion/spacy-models}). The weights live in a PyTorch pickle inside a msgpack blob. We read it without
+PyTorch, using an unpickler that resolves only a whitelist of tensor-rebuild functions, so no code from the file is
+executed (\file{scripts/extract\_roberta\_embeddings.py}). Nearest neighbours confirm the extraction (``king'' $\to$
+``queen'', ``Paris'' $\to$ ``France'', ``quantum'' $\to$ ``photon''). GloVe 100d is the \file{glove-wiki-gigaword-100}
+release of \file{RaRe-Technologies/gensim-data}. GPT-2 and sparse-autoencoder dictionaries, the natural next tests,
+were not reachable from the environment these notes were produced in.\par}
+
+\emph{Conventions.} All F1 scores are micro-averaged over features. Every stochastic experiment fixes its seeds in the
+script; results reported as mean $\pm$ sd are over the seeds listed in the corresponding table.
+
+\section{Corrections to earlier drafts}\label{app:corrections}
+
+These notes grew out of conversations in which several claims were made before they were tested. We list the ones
+that changed, because the changes are part of the result.
+
+\begin{center}\small
+\begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}p{4.6cm}>{\raggedright\arraybackslash}X l@{}}\toprule
+earlier claim & what we now think & evidence \\\midrule
+Removing the legibility budget collapses a frozen monitor ($0.92\to0.64$, one seed). &
+The drop is real ($0.92\to0.71\pm0.05$, five seeds) but mostly \emph{calibration}: refitting a scale and bias per
+feature restores $0.87$; full refit gives $0.94$. & E10 \\
+Task pressure densifies the code. & Not at the feature level: neurons per feature go from $1.16$ to $1.09$ when $p$
+triples. Message-level density rises only because more features are active. & E10 \\
+A monitor in the loss keeps its score while a hidden channel grows. & No evidence at this scale: the
+receiver$-$refit gap is $0.037\pm0.011$, against $0.029\pm0.019$ without the monitor. & E10 \\
+Dense codes win because they carry more energy ($n$ vs $k$). & Only with per-coordinate bounds (here $\tanh$);
+for a linear sender, rotation symmetry makes the argument void. & \S\ref{sec:saddle} \\
+Frame rotations are exactly flat directions. & Exact only for a linear sender; the coordinatewise nonlinearity breaks
+the symmetry, which is also what makes the public frame meaningful. & \S\ref{sec:saddle} \\
+Global $\lambda_{\min}\approx-2\times10^{-4}$ at the legible point. & That number came from an unconverged
+shifted power iteration, and finite-difference Hessians through ReLU kinks are unreliable anyway. Replaced by Lanczos at a
+constrained critical point with a smooth receiver. & E13 \\
+The legible code is a saddle. & Only critical where coordinates are unshared; in superposition, leaks into
+occupied coordinates feel first-order forces. & E15 \\
+Adam leaves the legible code because it is a saddle, escaping at a rate independent of the curvature. & At the
+operating noise the curvature is below $10^{-9}$: the code sits on a plateau, and Adam moves because it normalizes
+vanishing gradients, not because it escapes along a negative direction. & E13 \\
+The curvature at the legible code is the I-MMSE value (``checked'' in an earlier version of these notes). & Not
+confirmed. The first measurement analysed a saturated coordinate; the corrected one is confounded by the receiver
+memorizing its fixed noise sample and by its weight on empty coordinates. & E13 \\
+Unifying theorem stated via Gordon's theorem over $\F$. & Complex Gordon is not needed; the finite-set theorem is
+proved for both fields via the Beta law of a compressed norm. & \cref{thm:main} \\
+\bottomrule\end{tabularx}
+\end{center}
+\begin{center}\small
+\begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}p{4.6cm}>{\raggedright\arraybackslash}X l@{}}\toprule
+earlier claim & what we now think & evidence \\\midrule
+Adam versus SGD decides whether a code stays legible (one seed, $d=12$). & Confirmed over five seeds when the frame
+has empty coordinates, and refined: it is the \emph{sender's} rule that matters. False in superposition. & E11 \\
+A hybrid optimizer (SGD on the channel parameters, Adam elsewhere) keeps legibility at matched task performance. &
+True for $d=12<n$ (neurons per feature $1.08$ vs $2.07$ for Adam, task F1 $1.000$ for both). Not true for $d=32>n$,
+where the hybrid spreads as much as Adam. & E11 \\
+\bottomrule\end{tabularx}
+\end{center}
+
+\section{How these notes were made, in more detail}\label{app:provenance}
+
+\emph{September 2026.} D.W.\ proposed the correspondence between the AEHPV non-isometric code and superposition, and
+asked for the mathematics and for its bearing on governing agents that communicate in activations. In conversation,
+Claude proposed the unifying width condition, the reconstruction dictionary, a first numpy toy model of legibility
+drift, and the saddle and I-MMSE analysis; D.W.\ chose to pursue the monitorability direction and asked for the
+analytics and checks. On 24 September Claude wrote a first set of \LaTeX\ notes on Part I at D.W.'s request.
+
+\emph{September--October.} D.W.\ decided to split the work into a formal paper and a monitorability paper, chose
+titles, and drafted introductory text. The first paragraph of \cref{sec:intro} is D.W.'s, lightly edited at his
+request; the black hole background in \cref{sec:bh} is a rewrite by Claude of D.W.'s draft. D.W.\ put the project on
+hold because he did not want to believe the correspondence before testing it on trained networks. That is the origin of
+\cref{sec:part1-exp}.
+
+\emph{November 2026.} In a single working session, Claude wrote the repository, ran every experiment reported here,
+and drafted these notes, with D.W.\ setting the scope (``working notes, transparent about how they were made'').
+During that session the experiments overturned several earlier claims (\cref{app:corrections}). The model was Claude
+Opus 5.5.
+
+\emph{What has and has not been checked.} Every number is produced by code in the repository, and the hand-written
+gradients pass a finite-difference test. The proofs marked \proved\ were written by Claude; at the time of this
+version D.W.\ has not checked all of them, and this paragraph will say so explicitly when he has.

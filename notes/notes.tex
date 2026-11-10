@@ -1,0 +1,186 @@
+\documentclass[11pt]{amsart}
+% \usepackage{concmath}   % Concrete + Euler-style math: enable where texlive-fonts-extra is installed
+\usepackage{amsmath,amsthm,amssymb,mathrsfs}
+\usepackage[margin=1.1in]{geometry}
+\usepackage{booktabs,graphicx,xcolor,tabularx,enumitem}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,calc,decorations.pathmorphing,patterns,positioning}
+\usepackage[colorlinks,linkcolor=blue!50!black,citecolor=blue!50!black,urlcolor=blue!50!black]{hyperref}
+\usepackage[capitalize]{cleveref}
+\usepackage{tcolorbox}
+
+\theoremstyle{plain}
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{corollary}[theorem]{Corollary}
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{entry}[theorem]{Dictionary entry}
+\newtheorem{prediction}[theorem]{Prediction}
+\theoremstyle{remark}
+\newtheorem{remark}[theorem]{Remark}
+
+\newcommand{\R}{\mathbb R}\newcommand{\C}{\mathbb C}\newcommand{\F}{\mathbb F}
+\newcommand{\E}{\mathbb E}\renewcommand{\Pr}{\mathbb P}
+\newcommand{\Hil}{\mathcal H}\newcommand{\tr}{\operatorname{tr}}
+\newcommand{\ip}[2]{\langle #1,#2\rangle}
+\newcommand{\bra}[1]{\langle #1|}\newcommand{\ket}[1]{|#1\rangle}
+\newcommand{\braket}[2]{\langle #1|#2\rangle}
+\newcommand{\norm}[1]{\lVert #1\rVert}\newcommand{\abs}[1]{\lvert #1\rvert}
+\newcommand{\sdim}{\delta}\newcommand{\Var}{\operatorname{Var}}
+\newcommand{\mmse}{\mathrm{mmse}}
+\DeclareMathOperator{\ReLU}{ReLU}\DeclareMathOperator{\spark}{spark}\DeclareMathOperator{\cone}{cone}
+\newcommand{\repo}{\texttt{bhi}}
+\newcommand{\file}[1]{\texttt{#1}}
+% status tags used throughout
+\newcommand{\proved}{\textsf{\small[proved]}}
+\newcommand{\cited}{\textsf{\small[cited]}}
+\newcommand{\numchk}{\textsf{\small[checked numerically]}}
+\newcommand{\heur}{\textsf{\small[heuristic]}}
+\newcommand{\analogy}{\textsf{\small[analogy]}}
+
+\input{diagrams}
+
+\title[Interpretability and the black hole interior]{Interpretability and the Black Hole Interior}
+\author{David Wakeham and Claude}
+\date{Version 0.1, November 2026. Written with Claude (Anthropic); see ``How these notes were made''.}
+
+\begin{document}
+
+\begin{abstract}
+Neural networks simulate larger, interpretable networks using superposition. Black holes simulate the larger
+Hilbert space of their interior using superposition. Part~I makes the resemblance precise: both are random
+compressions that act as approximate isometries on ``thin'' sets of states (low complexity for the black hole,
+sparsity for the network), and one theorem covers both. From it we build a dictionary between the physics of the
+interior (null states, state-dependent reconstruction, the Page transition, the Python's lunch) and feature
+recovery as compressed sensing, with an explicit list of where the dictionary is exact and where it is only
+analogy. We then test the randomness assumption on trained models: toy models of superposition, RoBERTa token
+embeddings and GloVe. Trained codes agree with Haar-random codes at second order---but a frame identity forces
+this for any tight frame---and differ in informative ways at fourth order, in anisotropy and in their tails, while
+still recovering sparse combinations at the Donoho--Tanner threshold. Part~II asks what training does to the
+\emph{orientation} of a code relative to a public frame, the property that monitoring depends on. In a toy
+sender--receiver model, a code that is legible in the public frame is a critical point of the training loss when its
+coordinates are unshared. Theory makes it a saddle whose curvature is proportional to the receiver's residual error;
+at our operating point that curvature is below $10^{-9}$, and what moves the code is that adaptive optimizers turn
+vanishing gradients into finite steps. Accordingly, plain SGD on the sender alone preserves legibility at no cost to
+the task, while Adam spreads the code to no benefit. In superposition the legible code is not a critical point,
+drift follows the receiver, and the optimizer prescription fails. A quantitative test of the curvature theory was
+confounded by the receiver memorizing its training noise. Several claims from earlier drafts did not survive the experiments; the corrections are listed.
+\end{abstract}
+
+\maketitle
+
+\begin{tcolorbox}[colback=black!3, colframe=black!40, title=How these notes were made, fonttitle=\bfseries\small, fontupper=\small]
+The idea of comparing the non-isometric code of Akers, Engelhardt, Harlow, Penington and Vardhan~\cite{AEHPV}
+with superposition in neural networks, the decision to pursue its consequences for monitoring agents that
+communicate in activations, and the editorial direction of these notes are David Wakeham's. The derivations,
+code, experiments and most of the prose were produced by Claude (Anthropic; Claude Opus models) in conversation
+with D.W.\ between September and November 2026, with D.W.\ choosing directions, asking for checks, and editing.
+Every number in these notes is produced by a script in the accompanying repository (\repo; see
+\cref{app:repro}). Claims carry a status tag: \proved\ (proof given here), \cited\ (standard result, reference
+given), \numchk\ (verified by the code but not proved), \heur\ (derivation with uncontrolled steps), or
+\analogy. Earlier versions of several Part~II claims were wrong; \cref{app:corrections} lists what changed and
+which experiment changed it. \emph{Author's verification status:} at the time of writing D.W.\ has not yet
+independently checked every derivation; this sentence will be updated as he does.
+\end{tcolorbox}
+\newpage
+\tableofcontents
+\newpage
+\section{Introduction}\label{sec:intro}
+
+Black holes, like neural networks, are hard to look inside: a black hole has a horizon; a neural network is
+polysemantic. We show this is more than a simile. In both cases, a large ``effective'' space (the black hole
+interior; feature space) is compressed by a linear map into a smaller ``fundamental'' space (microscopic degrees
+of freedom; physical neurons). This forces initially orthogonal directions to overlap, leading to null states and
+state-dependent operators in the black hole setting, and interference and polysemanticity in networks. We isolate a
+single condition for the validity of both effective descriptions: states or features form an appropriately
+``thin'' set for which random linear compressions preserve inner products. We use this to build a correspondence
+between black holes and neural networks, make quantitative predictions about feature recovery, and test them in
+toy models of superposition and in the embeddings of trained language models. A collapsed star is a surprisingly
+rich guide to the inside of a neural network.
+
+\begin{figure}[t]
+\centering\TwoCompressions
+\caption{The two compressions. A large effective space is mapped by a linear code into a much smaller
+fundamental space. Most of the large space is annihilated (null states), yet on a thin set $\Sigma$---low
+complexity on the left, sparsity on the right---inner products survive. \Cref{thm:main} is the statement that
+these are one phenomenon.}
+\label{fig:two}
+\end{figure}
+
+Of the parallels, the Python's lunch~\cite{Lunch} deserves mention, because it concerns an
+\emph{observer} rather than the code. A lunch is a region whose information is present in the fundamental
+description but whose reconstruction is exponentially complex. Its classical counterpart is the gap between
+statistical and computational recovery in sparse decoding. A monitor is also an observer---a decoder with a fixed
+frame and a bounded budget---and this is where Part~II begins. For a black hole the code is a fixed fact about a
+state. For a network it is trained, so the question becomes dynamical: does optimization keep representations
+legible to a monitor, or move them away? Part~II studies this in the smallest model where the question makes
+sense.
+
+\subsection*{Summary of findings}
+\begin{enumerate}[leftmargin=*, itemsep=2pt]
+\item \textbf{One theorem} \proved. A Haar-random code over $\F\in\{\R,\C\}$ from dimension $M$ to $N$ preserves
+all inner products on a set $\Sigma$ to accuracy $\delta$ once $\log\abs{\Sigma}\ll\beta N\delta^2$
+(\cref{thm:main}). Low circuit complexity (AEHPV) and sparsity (the
+restricted isometry property from compressed sensing) are two special cases.
+\item \textbf{Exact moments} \proved\ \numchk. Overlap variances are $\frac{(M-N)(M-\abs{c}^2)}{N(M^2-1)}$ over
+$\C$ and $\frac{(m-n)(m+(m-2)c^2)}{n(m-1)(m+2)}$ over $\R$; the real/complex difference is exactly the third
+Brauer invariant (\cref{lem:projectors}).
+\item \textbf{Trained codes are not Haar, but are ``Haar-good''} \numchk. Second moments agree for a reason
+unrelated to randomness (\cref{prop:frame-identity}). Toy-model codes are \emph{better} than Haar at the extremes
+when features are plentiful, and maximally non-Haar (antipodal) when they are not. Real embeddings are
+anisotropic with heavy-tailed overlaps. Yet $\ell_1$ recovery of random sparse combinations sits at the Haar threshold, as the known universality of the
+Donoho--Tanner transition~\cite{Monajemi} would lead one to expect (\cref{sec:part1-exp}).
+\item \textbf{Legibility is a critical point, where there is room} \heur\ \numchk. In a sender--receiver toy, a
+code that is sparse in the public frame is a critical point in ``leak'' directions toward empty coordinates. Theory
+makes it a saddle with curvature proportional to the receiver's residual error (\cref{sec:saddle}); at our operating
+point that curvature is below $10^{-9}$, so the point is a plateau, and what matters is that Adam turns vanishing
+gradients into finite steps while gradient descent does not move. Accordingly, plain SGD on the sender alone keeps
+features on their coordinates at no cost to the task, even with Adam elsewhere---but only when coordinates are
+unshared. In superposition the legible code is not a critical point, drift follows the receiver, and the prescription
+fails. The quantitative curvature theory is untested in the full model (\cref{sec:part2-exp}).
+\item \textbf{Corrections} \numchk. Most of the frozen-monitor degradation reported in earlier drafts is
+\emph{calibration} drift, repairable by refitting a scale and bias per feature. The residual directional drift is
+real but smaller. Raising task pressure did not spread the code, and putting the monitor in the loss did not open a
+hidden channel at this scale (\cref{sec:part2-exp}, \cref{app:corrections}).
+\end{enumerate}
+
+\part*{Part I.\quad The correspondence}
+\input{part1}
+
+\part*{Part II.\quad Legibility and accidental obfuscation}
+\input{part2}
+
+\appendix
+\input{appendix}
+
+\bibliographystyle{amsplain}
+\begin{thebibliography}{99}
+\bibitem{AEHPV} C.~Akers, N.~Engelhardt, D.~Harlow, G.~Penington, S.~Vardhan, \emph{The black hole interior from non-isometric codes and complexity}, JHEP 06 (2024) 155, arXiv:2207.06536.
+\bibitem{TMS} N.~Elhage et al., \emph{Toy models of superposition}, Transformer Circuits Thread (2022).
+\bibitem{Page} D.~N.~Page, \emph{Average entropy of a subsystem}, Phys.\ Rev.\ Lett.\ 71 (1993) 1291.
+\bibitem{Lubkin} E.~Lubkin, \emph{Entropy of an $n$-system from its correlation with a $k$-reservoir}, J.\ Math.\ Phys.\ 19 (1978) 1028.
+\bibitem{HP} P.~Hayden, J.~Preskill, \emph{Black holes as mirrors}, JHEP 09 (2007) 120.
+\bibitem{Penington} G.~Penington, \emph{Entanglement wedge reconstruction and the information paradox}, JHEP 09 (2020) 002.
+\bibitem{AEMM} A.~Almheiri, N.~Engelhardt, D.~Marolf, H.~Maxfield, \emph{The entropy of bulk quantum fields and the entanglement wedge of an evaporating black hole}, JHEP 12 (2019) 063.
+\bibitem{Lunch} A.~R.~Brown, H.~Gharibyan, G.~Penington, L.~Susskind, \emph{The Python's lunch: geometric obstructions to decoding Hawking radiation}, JHEP 08 (2020) 121.
+\bibitem{Petz} D.~Petz, \emph{Sufficient subalgebras and the relative entropy of states of a von Neumann algebra}, Commun.\ Math.\ Phys.\ 105 (1986) 123.
+\bibitem{DT} D.~L.~Donoho, J.~Tanner, \emph{Counting faces of randomly projected polytopes when the projection radically lowers dimension}, J.\ AMS 22 (2009) 1.
+\bibitem{ALMT} D.~Amelunxen, M.~Lotz, M.~B.~McCoy, J.~A.~Tropp, \emph{Living on the edge: phase transitions in convex programs with random data}, Inf.\ Inference 3 (2014) 224.
+\bibitem{Monajemi} H.~Monajemi, S.~Jafarpour, M.~Gavish, Stat 330/CME 362 Collaboration, D.~L.~Donoho, \emph{Deterministic matrices matching the compressed sensing phase transitions of Gaussian random matrices}, PNAS 110 (2013) 1181.
+\bibitem{Gordon} Y.~Gordon, \emph{On Milman's inequality and random subspaces which escape through a mesh in $\mathbb R^n$}, Lecture Notes in Math.\ 1317 (1988).
+\bibitem{Vershynin} R.~Vershynin, \emph{High-Dimensional Probability}, Cambridge (2018).
+\bibitem{BDDW} R.~Baraniuk, M.~Davenport, R.~DeVore, M.~Wakin, \emph{A simple proof of the restricted isometry property for random matrices}, Constr.\ Approx.\ 28 (2008) 253.
+\bibitem{Natarajan} B.~K.~Natarajan, \emph{Sparse approximate solutions to linear systems}, SIAM J.\ Comput.\ 24 (1995) 227.
+\bibitem{GSV} D.~Guo, S.~Shamai, S.~Verd\'u, \emph{Mutual information and minimum mean-square error in Gaussian channels}, IEEE Trans.\ Inf.\ Theory 51 (2005) 1261.
+\bibitem{Welch} L.~Welch, \emph{Lower bounds on the maximum cross correlation of signals}, IEEE Trans.\ Inf.\ Theory 20 (1974) 397.
+\bibitem{Coconut} S.~Hao et al., \emph{Training large language models to reason in a continuous latent space}, arXiv:2412.06769 (2024).
+\bibitem{Baker} B.~Baker et al., \emph{Monitoring reasoning models for misbehavior and the risks of promoting obfuscation}, arXiv:2503.11926 (2025).
+\bibitem{Ethayarajh} K.~Ethayarajh, \emph{How contextual are contextualized word representations?}, EMNLP (2019).
+\bibitem{Bricken} T.~Bricken et al., \emph{Towards monosemanticity: decomposing language models with dictionary learning}, Transformer Circuits Thread (2023).
+\bibitem{RoBERTa} Y.~Liu et al., \emph{RoBERTa: a robustly optimized BERT pretraining approach}, arXiv:1907.11692 (2019).
+\bibitem{GloVe} J.~Pennington, R.~Socher, C.~D.~Manning, \emph{GloVe: global vectors for word representation}, EMNLP (2014).
+\end{thebibliography}
+
+\end{document}

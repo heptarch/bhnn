@@ -1,0 +1,121 @@
+% TikZ diagrams for the working notes.  Each is a macro so it can be placed in a figure.
+
+% ---------------------------------------------------------------- Penrose diagram
+% Evaporating black hole formed by a collapsing null shell (null lines at 45 degrees),
+% zoomed on the late-time region.
+\newcommand{\PenroseSlice}{%
+\begin{tikzpicture}[scale=1.15, >=Stealth, font=\small,
+    quantum/.style={decorate, decoration={snake, amplitude=1.1pt, segment length=5pt, post length=3pt}, ->}]
+  \clip (-1.0,2.75) rectangle (6.9,9.45);
+  \coordinate (im) at (0,0);   \coordinate (iz) at (6,6);   \coordinate (ip) at (3,9);
+  \coordinate (E) at (3,7.5);  \coordinate (S0) at (0,7.5);
+  \fill[black!4] (im) -- (iz) -- (ip) -- (E) -- (S0) -- cycle;
+  \fill[black!11] (0,4.5) -- (E) -- (S0) -- cycle;                       % black hole region
+  \draw[thick] (im) -- (S0) node[pos=0.5, left] {$r=0$};
+  \draw[thick] (E) -- (ip);
+  \draw[thick] (im) -- (iz) node[pos=0.8, below right] {$\mathscr I^-$};
+  \draw[thick] (iz) -- (ip) node[pos=0.4, above right] {$\mathscr I^+$};
+  \draw[thick, decorate, decoration={zigzag, segment length=5pt, amplitude=1.5pt}] (S0) -- (E)
+     node[midway, above=3pt] {singularity};
+  \draw[very thick, black!50] (3,3) -- (0,6) node[pos=0.3, left=3pt, font=\scriptsize, black!60] {collapsing shell};
+  \draw[thick, dashed] (0,4.5) -- (E);
+  \node[font=\scriptsize, rotate=45] at (0.95,4.95) {event horizon};
+  % one Hawking pair: outgoing quantum to I+, partner behind the horizon
+  \draw[quantum, black!75] (2.55,6.9) -- (3.65,8.0);
+  \draw[quantum, black!45] (2.3,7.0) -- (1.9,7.4);
+  % Cauchy slice
+  \coordinate (Ip) at (5.1,6.9); \coordinate (B) at (1.8,6.3); \coordinate (F) at (0.25,5.75);
+  \draw[line width=1.7pt, blue!70!black] (Ip) -- (B);
+  \draw[line width=1.7pt, red!70!black] (B) -- (F);
+  \fill (B) circle (2.4pt); \fill[black!65] (F) circle (2.1pt);
+  \node[blue!70!black, below] at (3.6,6.55) {$r\;/\;R$};
+  \node[red!70!black] at (0.85,6.35) {$\ell$};
+  \draw[black!60] (F) -- (-0.35,5.95) node[left, black] {$f$};
+  \node at (2.0,6.0) {$B$};
+  \node[blue!70!black, font=\scriptsize] at (5.55,7.25) {slice $\Sigma_t$};
+  \node[right] at (iz) {$i^0$}; \node[above] at (ip) {$i^+$};
+\end{tikzpicture}}
+
+% ---------------------------------------------------------- two compressions
+\newcommand{\CompressionPanel}[8]{% xshift, title, big, set, map, bigdim, small, smalldim
+    \begin{scope}[xshift=#1 cm]
+      \node[font=\small\bfseries] at (1.6,3.85) {#2};
+      \draw[thick, fill=black!3] (1.6,1.75) ellipse (1.55 and 1.35);
+      \node at (0.75,2.45) {$#3$};
+      \node[font=\scriptsize, black!60] at (1.6,3.38) {$\dim=#6$};
+      \fill[orange!35, draw=orange!70!black] plot[smooth cycle, tension=0.8]
+        coordinates {(1.0,1.6) (1.5,2.15) (2.15,2.0) (2.3,1.45) (1.7,1.2)};
+      \node at (1.65,1.65) {$#4$};
+      \fill[pattern=north east lines, pattern color=black!35] (1.0,0.75) ellipse (0.55 and 0.25);
+      \node[font=\scriptsize, black!60, anchor=west] at (1.6,0.55) {null states};
+      \draw[thick, fill=black!3] (1.6,-1.25) ellipse (0.8 and 0.5);
+      \node at (1.6,-1.25) {$#7$};
+      \node[font=\scriptsize, black!60, anchor=west] at (2.45,-1.25) {$\dim=#8$};
+      \draw[->, very thick] (1.6,0.35) -- node[right] {$#5$} (1.6,-0.7);
+    \end{scope}}
+\newcommand{\TwoCompressions}{%
+\begin{tikzpicture}[>=Stealth, font=\small]
+  \CompressionPanel{0}{black hole interior}{\mathcal H_\ell}{\Sigma_C}{V}{e^{S_\ell}}{\mathcal H_B}{e^{S_{\rm BH}}}
+  \CompressionPanel{6.4}{network layer}{\mathbb R^m}{\Sigma_k}{W}{m}{\mathbb R^n}{n}
+  \node[align=center, font=\small] at (4.8,-2.3)
+    {$\sup_{x,y\in\Sigma}\big|\langle Vx,Vy\rangle-\langle x,y\rangle\big| \;\lesssim\; \sqrt{\log|\Sigma|\,/\,\beta\,\dim}$\\[1pt]
+     \scriptsize one theorem: $\beta=2$ and $\Sigma=$ low complexity (left); $\beta=1$ and $\Sigma=$ sparse (right)};
+\end{tikzpicture}}
+
+% ------------------------------------------------- toy model of superposition
+\newcommand{\TMSPicture}{%
+\begin{tikzpicture}[>=Stealth, font=\small, scale=1.0]
+  % left: bipartite features -> neurons
+  \foreach \i in {1,...,8} \node[circle, draw, minimum size=11pt, inner sep=0pt, fill=white] (f\i) at (0.55*\i,2.2) {};
+  \foreach \i in {2,7} \node[circle, draw, minimum size=11pt, inner sep=0pt, fill=orange!45] at (f\i) {};
+  \foreach \j in {1,2,3} \node[rectangle, draw, minimum size=12pt, inner sep=0pt, fill=black!6] (n\j) at (0.55+1.1*\j,0.6) {};
+  \foreach \i/\j/\w in {1/1/0.8, 2/1/0.4, 2/2/1.2, 3/2/0.6, 4/3/0.9, 5/1/0.5, 5/3/0.5, 6/2/0.8, 7/3/1.2, 7/1/0.4, 8/2/0.6, 3/3/0.3, 6/1/0.3, 8/3/0.5, 1/2/0.2, 4/1/0.3}
+     \draw[line width=\w pt, black!60] (f\i) -- (n\j);
+  \node[anchor=east, font=\scriptsize] at (0.3,2.2) {features $x\in\mathbb R^m$};
+  \node[anchor=east, font=\scriptsize] at (1.4,0.6) {neurons $h=Wx$};
+  \node[font=\scriptsize, black!60, align=center] at (2.5,-0.05) {each neuron reads many features\\(polysemantic)};
+  % right: pentagon of feature directions in R^2
+  \begin{scope}[xshift=6.6cm, yshift=1.3cm]
+    \draw[black!30] (-1.3,0) -- (1.3,0); \draw[black!30] (0,-1.3) -- (0,1.3);
+    \foreach \k in {0,2,3,4} \draw[->, thick] (0,0) -- ({90+72*\k}:1.15);
+    \draw[->, thick, orange!80!black] (0,0) -- (162:1.15);
+    \node[font=\scriptsize] at (0,-1.6) {$m=5$ features in $n=2$ neurons};
+    \node[font=\scriptsize, orange!80!black] at (-1.45,0.55) {$w_i$};
+  \end{scope}
+\end{tikzpicture}}
+
+% ----------------------------------------------------- sender/receiver/monitor
+\newcommand{\ChannelPicture}{%
+\begin{tikzpicture}[>=Stealth, font=\small, node distance=1.25cm,
+    box/.style={draw, thick, rounded corners=2pt, minimum height=0.9cm, align=center, fill=black!3}]
+  \node[box] (x) {features\\$x\in\{0,1\}^d$};
+  \node[box, right=0.9cm of x] (s) {sender\\$h=\tanh(Ax+a)$};
+  \node[box, right=0.9cm of s, fill=blue!6] (h) {message $h\in\mathbb R^n$\\[-1pt]\scriptsize public frame $=$ coordinates};
+  \node[box, right=0.9cm of h] (r) {receiver\\MLP};
+  \node[box, right=0.9cm of r] (xh) {$\hat x$};
+  \draw[->, thick] (x) -- (s);
+  \draw[->, thick] (s) -- (h);
+  \draw[->, thick] (h) -- node[above, font=\scriptsize] {$+\sigma\xi$} (r);
+  \draw[->, thick] (r) -- (xh);
+  \node[box, below=1.0cm of h, fill=orange!12, text width=5.6cm] (m)
+     {linear monitor $\mathrm{sigmoid}(Mh+m_0)$\\[-1pt]\scriptsize frozen $\;\to\;$ recalibrated (scale, bias) $\;\to\;$ refit};
+  \draw[->, thick, orange!70!black] (h) -- (m);
+  \draw[->, dashed, thick, orange!70!black] (m.west) -| (s.south);
+  \node[font=\scriptsize, orange!70!black, anchor=north] at ($(s.south)+(0,-1.55)$) {optional: monitor in the loss ($\mu$)};
+\end{tikzpicture}}
+
+% ---------------------------------------------- legibility levels (ladder)
+\newcommand{\MonitorLadder}{%
+\begin{tikzpicture}[font=\small, >=Stealth]
+  \foreach \y/\lab/\desc in {3/receiver/{what the channel carries (task F1)},
+                             2/refit/{best linear public decoder, retrained},
+                             1/recalibrated/{frozen directions; new scale and bias},
+                             0/frozen/{decoder fixed at the legible checkpoint}} {
+     \draw[thick] (0,0.95*\y) -- (1.4,0.95*\y);
+     \node[anchor=east] at (-0.1,0.95*\y) {\lab};
+     \node[anchor=west, font=\scriptsize, black!65] at (1.55,0.95*\y) {\desc};
+  }
+  \draw[<->, thick, blue!60!black] (6.9,0.05) -- node[right, font=\scriptsize, align=left] {calibration drift} (6.9,0.9);
+  \draw[<->, thick, red!60!black] (6.9,1.0) -- node[right, font=\scriptsize, align=left] {frame (direction) drift} (6.9,1.85);
+  \draw[<->, thick, black!70] (6.9,1.95) -- node[right, font=\scriptsize, align=left] {hidden channel} (6.9,2.8);
+\end{tikzpicture}}

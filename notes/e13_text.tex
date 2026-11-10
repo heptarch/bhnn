@@ -1,0 +1,31 @@
+Three findings, one of them negative.
+
+\emph{At the operating point the legible code is flat, not a saddle.} At $\sigma=0.1$, the noise level of E10 and
+E11, the polished point is critical to $6\times10^{-9}$, and the global $\lambda_{\min}$, the leak curvatures and the
+envelope curvatures are all below $10^{-9}$ in magnitude. This is not an artefact. The
+receiver's error on fresh noise is itself a few times $10^{-11}$, so \cref{prop:immse} predicts a negative curvature of
+order $10^{-12}$. Every second derivative of the cross-entropy carries a factor of the receiver's residual error, and
+a receiver that decodes almost perfectly sits on a plateau. There is no saddle to escape. Gradient descent has
+nothing to follow, while Adam turns vanishing gradients into steps of size $\eta$. This is the second mechanism of
+\cref{sec:saddle}, and it is the one that accounts for E11 at $d=12$: Adam on the sender spreads the code, the
+spread buys nothing on the task, and SGD on the sender leaves the code where it is.
+
+\emph{The receiver does not ignore empty coordinates.} \Cref{lem:stationary} assumes that the receiver puts no weight
+on a coordinate that carries only noise. Trained receivers do: the weight on the empty coordinate we analyse is
+comparable to the weight on owned coordinates at every $\sigma$ (\file{e13\_fresh.py}). Its cost is
+second order in $\sigma$ and suppressed by the receiver's confidence, so it survives from initialization. The lemma
+therefore holds only in a weaker form: the leak gradient is proportional to that weight times the residual error,
+which is negligible at the operating point (E15, $d=12$) but not at high noise.
+
+\emph{The quantitative curvature theory is not confirmed.} At $\sigma=0.2$ and $0.4$ everything is again flat, but
+for a different reason: on its fixed batch the receiver has memorized the channel noise (residual error $10^{-17}$ and
+$10^{-13}$ on the batch, against $4\times10^{-5}$ and $8\times10^{-3}$ on fresh noise). The Hessian we compute is the
+Hessian of an overfit empirical loss, and the I-MMSE prediction with the fresh-noise error ($-8\times10^{-5}$,
+$-2\times10^{-3}$) is orders of magnitude larger than anything measured. At $\sigma=0.6$ and $0.9$ the batch and
+fresh errors are closer, and negative curvature appears: the global $\lambda_{\min}$ is $-8\times10^{-4}$ and
+$-2\times10^{-2}$, and at $\sigma=0.9$ its eigenvector lies 85\% on leaks into empty coordinates. So the legible code
+is a saddle at high noise. But it is not the saddle of \cref{sec:saddle}. The point is not critical in leak
+directions (gradient about $2\times10^{-2}$, against $1.5$--$2.5\times10^{-3}$ within the support), the leak curvature is positive rather
+than zero because the receiver reads the empty coordinate, and the per-feature envelope curvature is positive (for 23 of the 24
+features) where \cref{prop:immse} predicts it negative. A clean test of the I-MMSE formula for trained receivers needs the Hessian of
+the population loss (fresh noise and much larger batches), which we have not done.

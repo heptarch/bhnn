@@ -1,0 +1,32 @@
+\begin{table}[h]\centering\footnotesize
+\resizebox{\linewidth}{!}{\begin{tabular}{@{}ll cc c cc cc c@{}}\toprule
+ & & $n\,\E\cos^2$ & excess & & \multicolumn{2}{c}{$\Pr(|\cos|>t)$} & \multicolumn{2}{c}{max coherence} & tight- \\
+model & version & (Haar $\approx1$) & kurt. & $t$ & observed & Gaussian & observed & Haar & ness \\\midrule
+RoBERTa & raw & 2.70 & 2.77 & 0.2 & 4.9e-03 & 3.0e-08 & 0.81 & 0.17 & 0.35 \\
+ & centred & 2.13 & 3.05 & 0.2 & 2.5e-03 & 3.0e-08 & 0.81 & 0.17 & 0.43 \\
+ & whitened & 0.99 & 5.09 & 0.2 & 2.9e-04 & 3.0e-08 & 0.88 & 0.17 & 0.85 \\
+\addlinespace
+GloVe & raw & 4.77 & -0.26 & 0.5 & 1.7e-02 & 5.7e-07 & 0.96 & 0.55 & 0.20 \\
+ & centred & 1.53 & 0.64 & 0.5 & 9.1e-04 & 5.7e-07 & 0.98 & 0.55 & 0.65 \\
+ & whitened & 1.02 & 0.42 & 0.5 & 2.0e-04 & 5.7e-07 & 0.94 & 0.55 & 0.96 \\
+\bottomrule\end{tabular}}
+
+\medskip
+\resizebox{0.6\linewidth}{!}{\begin{tabular}{@{}lrr ccc@{}}\toprule
+ & & & \multicolumn{3}{c}{exact $\ell_1$ recovery rate} \\
+model & $m_{\rm sub}$ & $k$ ($k^*$) & centred & whitened & Haar \\\midrule
+RoBERTa & 1536 & 222 (296) & 1.00 & 1.00 & 1.00 \\
+RoBERTa & 1536 & 296 (296) & 0.50 & 0.50 & 0.62 \\
+RoBERTa & 1536 & 370 (296) & 0.00 & 0.00 & 0.00 \\
+GloVe & 200 & 19 (39) & 1.00 & 1.00 & 1.00 \\
+GloVe & 200 & 29 (39) & 1.00 & 1.00 & 0.97 \\
+GloVe & 200 & 35 (39) & 0.83 & 0.93 & 0.83 \\
+GloVe & 200 & 39 (39) & 0.57 & 0.47 & 0.43 \\
+GloVe & 200 & 42 (39) & 0.23 & 0.27 & 0.30 \\
+GloVe & 200 & 48 (39) & 0.00 & 0.00 & 0.03 \\
+\bottomrule\end{tabular}}
+\caption{E03: language-model embeddings as codes. Top: overlap statistics over $4\times10^5$ random pairs; $t$ is the tabulated threshold nearest $4/\sqrt n$ ($5.5/\sqrt n$ for RoBERTa, $5/\sqrt n$ for GloVe);
+the Gaussian column is the tail of $\mathcal N(0,1/n)$; coherence over 4000 random items. Bottom: signed $\ell_1$
+recovery from a random sub-dictionary of $m_{\rm sub}=2n$ items ($k^*$: predicted threshold; RoBERTa 8 trials per
+entry, GloVe 30).}
+\label{tab:e03}\end{table}

@@ -1,0 +1,143 @@
+% ============================================================== PART II
+\section{Setting: a channel, a public frame, and monitors}\label{sec:setting}
+
+Part~I was about the \emph{geometry} of a code: its Gram matrix, which is invariant under rotations of the
+fundamental space. Monitoring depends on the part of the code that is \emph{not} rotation invariant: how its
+features sit relative to a frame that an outside observer knows. Natural language is such a frame, and so is a
+sparse-autoencoder dictionary or the neuron basis. When two models communicate in activations rather than tokens
+(latent reasoning~\cite{Coconut}, activation handoff between agents), the question is whether training keeps the
+message legible in the frame the overseer reads.
+
+\begin{figure}[h]
+\centering\ChannelPicture
+\caption{The toy model of Part II. A sender writes a message $h$ in $\R^n$; the public frame is the coordinate
+basis, made meaningful by the coordinatewise nonlinearity. The receiver reads a noisy copy. A linear monitor reads
+$h$, either frozen at a legible checkpoint, recalibrated, or refit.}
+\label{fig:channel}
+\end{figure}
+
+\subsection{The model}
+Features $x\in\{0,1\}^d$ are i.i.d.\ Bernoulli($p$). The sender writes $h=\tanh(Ax+a)\in\R^n$; the channel adds
+$\sigma\xi$ with $\xi\sim\mathcal N(0,I)$; a one-hidden-layer receiver outputs logits for $x$; the loss is the
+summed binary cross-entropy. Unless stated otherwise $n=16$, $\sigma=0.1$, $p=0.1$, the receiver has 64 hidden
+units, and training uses minibatches of 256. A code is \emph{legible} if each feature drives one public coordinate:
+$A_{jl}=0$ unless $j=o(l)$, the coordinate it owns. We produce legible codes by training with an $\ell_1$ budget
+$\lambda\sum_j\abs{h_j}$ in the public frame, and then ask what happens when training continues.
+
+\subsection{What we measure}
+Two kinds of legibility, which turn out to behave differently.
+\begin{itemize}[leftmargin=*]
+\item \emph{Feature-level spread}: the participation ratio of each sender column, $\big(\sum_jA_{jl}^2\big)^2/\sum_jA_{jl}^4$,
+averaged over features (``neurons per feature''; 1 for a legible code).
+\item \emph{Monitor-level legibility}: the F1 score of linear monitors reading $h$. The \emph{frozen} monitor is a
+logistic probe fit at the legible checkpoint and never touched again. The \emph{recalibrated} monitor keeps the
+frozen directions and refits only a scale and bias per feature. The \emph{refit} monitor is retrained on the
+current code with the same budget as the frozen one. The receiver's own F1 bounds what is in the channel.
+\end{itemize}
+The differences between consecutive levels in \cref{fig:ladder} separate three effects that earlier drafts of these
+notes conflated.
+
+\begin{figure}[h]
+\centering\MonitorLadder
+\caption{Four readings of the same message. Frozen $\to$ recalibrated measures calibration drift (amplitudes and
+offsets changed; cheap to repair with labels). Recalibrated $\to$ refit measures frame drift (the directions
+changed). Refit $\to$ receiver measures information the receiver uses that no linear public decoder recovers.}
+\label{fig:ladder}
+\end{figure}
+
+\section{Theory: the legible critical point}\label{sec:saddle}
+
+\subsection{What privileges the public frame}
+\begin{proposition}\proved
+If the sender were linear, $h=Ax$, with an $\ell_2$ power constraint, then for every orthogonal $O$ the codes $A$
+and $OA$ achieve the same optimal loss (the receiver absorbs $O^\top$, and the noise is isotropic). There is no
+preferred frame, and ``legible'' is not a meaningful property.
+\end{proposition}
+The coordinatewise $\tanh$ breaks this symmetry, because it bounds each coordinate separately. This is the
+``privileged basis'' of~\cite{TMS}, and it has a second consequence. The feasible set of messages is a cube, and a
+message that uses $k$ coordinates has energy at most $k$, whereas one that uses all $n$ coordinates can have energy
+$n$ while still respecting each bound. Against isotropic noise, energy buys distinguishability. So the same feature of the
+architecture that makes the public frame meaningful also makes spreading across it pay. (An earlier draft argued
+that spreading pays from energy considerations alone; without the per-coordinate bound that argument is false,
+since rotating a code changes nothing.)
+
+\subsection{Stationarity in leak directions}
+\begin{lemma}\label{lem:stationary}\proved
+Let the code be legible and let $j$ be an \emph{empty} coordinate (owned by no feature), so $h_j=\tanh(a_j)$ is
+constant. If the receiver ignores $j$ ($B_{:,j}=0$), then $\partial L/\partial A_{jl}=0$ and
+$\partial^2L/\partial A_{jl}^2=0$ for every feature $l$.
+\end{lemma}
+\begin{proof}
+$\partial L/\partial A_{jl}=\E\big[(\sum_u\delta_uB_{uj})\,\phi'(z_j)\,x_l\big]$ with $\delta=\partial L/\partial v$,
+which vanishes when $B_{:,j}=0$. Differentiating again, every term carries a factor of $B_{:,j}$.
+\end{proof}
+At the receiver's optimum, reading a coordinate that carries only noise does not help, so one expects
+$B_{:,j}\approx0$. (Trained receivers do not get there, because the cost of reading noise is second order and
+suppressed by the receiver's confidence. In practice the lemma holds in the weaker form that the leak gradient is
+proportional to $B_{:,j}$ times the residual error; see E13.) Leaks into a coordinate \emph{owned by another feature} have no such protection. With more features
+than coordinates (superposition) every coordinate is owned, and a legible code need not be a critical point at all.
+
+\subsection{Envelope curvature: the I-MMSE formula}
+If the receiver re-optimizes as the sender leaks, the relevant quantity is the curvature of the envelope.
+\begin{proposition}[Envelope curvature]\label{prop:immse}\proved\ (for the Bayes receiver)
+Let $\ell$ own coordinate $o(\ell)$ and leak by $\varepsilon$ into empty coordinate $j$, and let the receiver be
+Bayes-optimal. Then
+\[
+\frac{d^2L_{\rm env}}{d\varepsilon^2}\Big|_{\varepsilon=0}=-\frac{\phi'(a_j)^2\,\mmse_\ell}{\sigma^2},
+\]
+where $\mmse_\ell=\E(x_\ell-\E[x_\ell\mid y])^2$ is the residual error of feature $\ell$ and $\phi'=1-\tanh^2$.
+\end{proposition}
+\begin{proof}
+Features are independent and each coordinate depends on one feature, so the loss for $\ell$ is
+$H(x_\ell)-I(x_\ell;y)$. The leak adds a second Gaussian observation of $x_\ell$ with gap $\phi'(a_j)\varepsilon$ and
+noise $\sigma$; the two observations combine into one with $\mathrm{snr}=(g_\ell^2+\phi'(a_j)^2\varepsilon^2)/\sigma^2$.
+By the I-MMSE relation~\cite{GSV}, $dI/d\,\mathrm{snr}=\frac12\mmse$ for any input distribution, so
+$d^2I/d\varepsilon^2|_0=\phi'(a_j)^2\mmse_\ell/\sigma^2$.
+\end{proof}
+The formula unifies two sources of negative curvature that earlier drafts treated separately. When a feature is read
+poorly because of interference, $\mmse_\ell$ stays large and the force is $\propto1/\sigma^2$. When it is read poorly
+because of noise, $\mmse_\ell$ is a Gaussian tail and the force is non-monotone in $\sigma$.
+
+\subsection{What gradient descent actually sees: the handshake}
+Gradient descent follows the joint Hessian, not the envelope. Restricted to the leak $\varepsilon=A_{j\ell}$ and the
+read $r=B_{:,j}$, \cref{lem:stationary} gives the block
+\[
+\mathcal H=\begin{pmatrix}0&C^\top\\ C&H_{rr}\end{pmatrix},\qquad
+\lambda_-=\tfrac12\Big(h-\sqrt{h^2+4\norm C^2}\Big)\approx-\norm C\quad(h\ll\norm C),
+\]
+with $h$ the receiver curvature along $C$ \heur. The sender cannot profit from leaking until the receiver reads,
+and the receiver cannot profit from reading until the sender leaks: the unstable direction is half leak, half read,
+and the envelope curvature is the Schur complement $-C^\top H_{rr}^{-1}C$. Under gradient descent with step $\eta$,
+a perturbation of size $z_0$ escapes in a time of order $\log(1/z_0)/(\eta\abs{\lambda_-})$, so a code whose features
+are already well read lingers at the saddle. Note what this implies at the extreme: every curvature in this picture
+carries a factor of the receiver's residual error (\cref{prop:immse}), so when the features are decoded almost
+perfectly the saddle is almost flat, and gradient descent does not leave it at all on any practical time scale.
+
+Adam divides each coordinate's update by a running estimate of its gradient magnitude. Near the saddle that
+magnitude is tiny, and the normalized step has size $\approx\eta$ regardless of $\norm C$. Two consequences follow:
+\begin{enumerate}[leftmargin=*]
+\item Adam's escape time is essentially independent of the curvature (\cref{fig:handshake}).
+\item Even where the expected gradient vanishes, minibatch noise in the leak gradient is normalized into
+steps of size $\sim\eta$. So the sender random-walks off the legible support whether or not the receiver reads the
+result. The message densifies without being used.
+\end{enumerate}
+The second mechanism needs no negative curvature at all. E13 below finds that it is the one operating at the noise
+level of our drift experiments, where the legible point is flat to numerical precision.
+
+\begin{prediction}\label{pred:writer}
+Spread of the message in the public frame is controlled by the update rule of the parameters that \emph{write} the
+message. Plain SGD on the sender preserves legibility even if everything else uses Adam; Adam on the sender spreads
+the message even if the receiver uses SGD.
+\end{prediction}
+
+\begin{figure}[t]
+\centering\includegraphics[width=0.85\linewidth]{figs/e14_handshake.pdf}
+\caption{E14: the handshake saddle in isolation, $L=c\,\varepsilon r+\frac h2r^2+\frac q4(\varepsilon^2+r^2)^2$ with
+$h=0.05c$, $q=c$. Left: distance from the saddle against steps; gradient descent waits, then grows exponentially;
+Adam (both values of $c$ coincide) leaves at once. Right: escape time against $\abs{\lambda_-}$ over two and a half
+decades. Gradient descent takes 1.6--4\% longer than $\log(1/z_0)/(\eta\abs{\lambda_-})$ (the excess grows with
+$\abs{\lambda_-}$, where the discrete-step and quartic corrections matter); Adam takes 58 steps throughout.}
+\label{fig:handshake}
+\end{figure}
+
+\input{part2_experiments}

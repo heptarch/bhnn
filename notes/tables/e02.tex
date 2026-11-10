@@ -1,0 +1,17 @@
+\begin{table}[h]\centering\footnotesize\setlength{\tabcolsep}{3.2pt}
+\resizebox{\linewidth}{!}{\begin{tabular}{@{}rrr cc cc cc c c cc cc@{}}\toprule
+ & & & \multicolumn{2}{c}{mean $\langle w_i,w_j\rangle^2$} & \multicolumn{2}{c}{excess kurt.} & \multicolumn{2}{c}{max positive} & tight- & & \multicolumn{2}{c}{recovery at $k$} & \multicolumn{2}{c}{TMS loss} \\
+$m$ & $p$ & rep. & trained & Haar & trained & Haar & trained & Haar & ness & $k$ ($k^*$) & trained & Haar & trained & Haar \\\midrule
+64 & 0.1 & 64 & 0.0159 & 0.0163 & 59.97 & -0.00 & 0.006 & 0.414 & 1.000 & 18 (17.9) & 0.03 & 0.67 & 0.106 & 0.491 \\
+64 & 0.03 & 64 & 0.0159 & 0.0163 & 59.96 & 0.02 & 0.010 & 0.485 & 1.000 & 18 (17.9) & 0.07 & 0.47 & 0.010 & 0.090 \\
+128 & 0.03 & 128 & 0.0237 & 0.0240 & 1.31 & -0.10 & 0.165 & 0.554 & 0.997 & 12 (11.7) & 0.47 & 0.47 & 0.206 & 0.431 \\
+128 & 0.01 & 128 & 0.0238 & 0.0240 & 1.10 & -0.12 & 0.149 & 0.548 & 0.996 & 12 (11.7) & 0.40 & 0.50 & 0.027 & 0.095 \\
+256 & 0.01 & 256 & 0.0275 & 0.0276 & -0.63 & -0.15 & 0.239 & 0.636 & 0.999 & 8 (8.4) & 0.50 & 0.77 & 0.188 & 0.340 \\
+256 & 0.003 & 256 & 0.0275 & 0.0277 & -0.68 & -0.14 & 0.236 & 0.603 & 0.998 & 8 (8.4) & 0.60 & 0.77 & 0.025 & 0.072 \\
+\bottomrule\end{tabular}}
+\caption{E02: toy models of superposition ($n=32$) against Haar frames of the same shape. ``rep.''\ = represented
+features; tightness = participation ratio of the frame operator$/n$ (1 = tight). Recovery: nonnegative $\ell_1$, 30
+trials at the $k$ nearest the predicted threshold $k^*$. TMS loss: trained model vs a Haar frame with the best
+uniform bias. The mean overlap of every trained code equals $-1/(m-1)$ to four digits: its feature directions sum
+to zero.}
+\label{tab:e02}\end{table}

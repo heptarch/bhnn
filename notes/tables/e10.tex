@@ -1,0 +1,13 @@
+\begin{table}[h]\centering\footnotesize
+\resizebox{\linewidth}{!}{\begin{tabular}{@{}l ccccc@{}}\toprule
+condition (after 6000 steps) & receiver F1 & frozen & recalibrated & refit & neurons/feature \\\midrule
+legible checkpoint & 0.915\,$\pm$\,0.018 & 0.922\,$\pm$\,0.019 & 0.927\,$\pm$\,0.015 & 0.922\,$\pm$\,0.017 & 1.159\,$\pm$\,0.123 \\\midrule
+release & 0.984\,$\pm$\,0.001 & 0.714\,$\pm$\,0.047 & 0.865\,$\pm$\,0.061 & 0.937\,$\pm$\,0.013 & 1.733\,$\pm$\,0.336 \\
+pressure & 0.922\,$\pm$\,0.006 & 0.790\,$\pm$\,0.066 & 0.839\,$\pm$\,0.053 & 0.893\,$\pm$\,0.015 & 1.085\,$\pm$\,0.055 \\
+pressure+budget & 0.827\,$\pm$\,0.012 & 0.772\,$\pm$\,0.052 & 0.798\,$\pm$\,0.026 & 0.822\,$\pm$\,0.021 & 1.214\,$\pm$\,0.216 \\
+pressure+monitor & 0.907\,$\pm$\,0.004 & 0.803\,$\pm$\,0.018 & 0.872\,$\pm$\,0.030 & 0.870\,$\pm$\,0.011 & 1.241\,$\pm$\,0.156 \\
+\bottomrule\end{tabular}}
+\caption{E10: four continuations of a legible code ($d=32$, $n=16$, Adam), mean $\pm$ sd over 5 seeds. ``pressure'':
+feature density $p$ raised from 0.1 to 0.3; ``budget'': the $\ell_1$ legibility budget is kept; ``monitor'': the
+frozen monitor's loss is added to the training loss. Receiver$-$refit gap: 0.029\,$\pm$\,0.019 under pressure, 0.037\,$\pm$\,0.011 with the monitor in the loss.}
+\label{tab:e10}\end{table}

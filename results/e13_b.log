@@ -1,0 +1,4 @@
+/home/claude/bhi/experiments/e13_saddle_hessian.py:124: RuntimeWarning: invalid value encountered in log
+  f"{np.corrcoef(np.log(-lam_b + 1e-15), np.log(mm + 1e-15))[0, 1]:.2f} "
+sigma=0.2: empties=4 |g|within=7.5e-09 |g|leak-empty=1.1e-09 |g|leak-occupied=2.0e-09 lam_global=-1.34e-09 vec={'leak_empty': 0.69, 'leak_occupied': 0.01, 'sender_support': 0.23, 'receiver_read_empty': 0.03, 'receiver_other': 0.03} block lam [1.00e-12,1.44e-12] corr(log|lam|,log mmse)=nan median schur/immse=-24231110.95 [387s]
+sigma=0.6: empties=4 |g|within=1.5e-03 |g|leak-empty=1.6e-02 |g|leak-occupied=4.3e-05 lam_global=-8.29e-04 vec={'leak_empty': 0.07, 'leak_occupied': 0.0, 'sender_support': 0.02, 'receiver_read_empty': 0.13, 'receiver_other': 0.79} block lam [6.32e-04,6.43e-04] corr(log|lam|,log mmse)=nan median schur/immse=-5.65 [1588s]

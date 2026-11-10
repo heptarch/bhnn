@@ -1,0 +1,12 @@
+\begin{table}[h]\centering\footnotesize\setlength{\tabcolsep}{3pt}
+\resizebox{\linewidth}{!}{\begin{tabular}{@{}rr cc cc cc c@{}}\toprule
+ & & \multicolumn{2}{c}{coordinates (of 16)} & \multicolumn{2}{c}{gradient within support} & \multicolumn{2}{c}{gradient, leaks into occupied} & leaks into \\\cmidrule(lr){3-4}\cmidrule(lr){5-6}\cmidrule(lr){7-8}
+$d$ & seeds & empty & shared & norm & per entry & norm & per entry & empty, norm \\\midrule
+12 & 3 & 4.3 & 0.3 & 1.9e-09--2.7e-07 & 4.3e-11--6.1e-09 & 7.7e-10--6.6e-07 & 6.4e-11--5.7e-08 & 2.7e-10--2.7e-07 \\
+32 & 3 & 0.3 & 13.7 & 2.9e-02--4.1e-02 & 5.1e-04--7.3e-04 & 1.5e-01--1.8e-01 & 7.0e-03--8.1e-03 & 0.0e+00--3.9e-04 \\
+\bottomrule\end{tabular}}
+\caption{E15: is the legible code a critical point? Starting from E11's legible codes (same seeds, ReLU receiver), each
+feature is restricted to its strongest coordinate (shared coordinates kept) and all parameters are polished within that
+support (full batch of 6144, $\sigma=0.1$). Gradient norms, and root-mean-square per entry, in three groups of
+directions; ranges are over seeds.}
+\label{tab:e15}\end{table}

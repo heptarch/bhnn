@@ -1,0 +1,42 @@
+\contentsline {section}{\tocsection {}{1}{Introduction}}{3}{section.1}%
+\contentsline {subsection}{\tocsubsection {}{}{Summary of findings}}{3}{section*.2}%
+\contentsline {part}{\tocpart {Part}{}{Part I.\hskip 1em\relax The correspondence}}{4}{section*.3}%
+\contentsline {section}{\tocsection {}{2}{Two compressions}}{4}{section.2}%
+\contentsline {subsection}{\tocsubsection {}{2.1}{The black hole interior}}{4}{subsection.2.1}%
+\contentsline {subsection}{\tocsubsection {}{2.2}{Superposition}}{6}{subsection.2.2}%
+\contentsline {subsection}{\tocsubsection {}{2.3}{The static dictionary}}{6}{subsection.2.3}%
+\contentsline {section}{\tocsection {}{3}{The unifying theorem}}{6}{section.3}%
+\contentsline {subsection}{\tocsubsection {}{3.1}{Second moments}}{6}{subsection.3.1}%
+\contentsline {subsection}{\tocsubsection {}{3.2}{Concentration and the theorem}}{8}{subsection.3.2}%
+\contentsline {section}{\tocsection {}{4}{The reconstruction dictionary}}{9}{section.4}%
+\contentsline {subsection}{\tocsubsection {}{4.1}{Decoders}}{9}{subsection.4.1}%
+\contentsline {subsection}{\tocsubsection {}{4.2}{State dependence}}{9}{subsection.4.2}%
+\contentsline {subsection}{\tocsubsection {}{4.3}{The Page transition and the Donoho--Tanner transition}}{10}{subsection.4.3}%
+\contentsline {subsection}{\tocsubsection {}{4.4}{The Python's lunch and the computational--statistical gap}}{10}{subsection.4.4}%
+\contentsline {subsection}{\tocsubsection {}{4.5}{Cloning}}{11}{subsection.4.5}%
+\contentsline {section}{\tocsection {}{5}{Experiments: are trained codes Haar-random?}}{11}{section.5}%
+\contentsline {subsection}{\tocsubsection {}{5.1}{E01: the formulas}}{11}{subsection.5.1}%
+\contentsline {subsection}{\tocsubsection {}{5.2}{E02: toy models of superposition}}{11}{subsection.5.2}%
+\contentsline {subsection}{\tocsubsection {}{5.3}{E03: language-model embeddings}}{12}{subsection.5.3}%
+\contentsline {subsection}{\tocsubsection {}{5.4}{What this means for the correspondence}}{14}{subsection.5.4}%
+\contentsline {part}{\tocpart {Part}{}{Part II.\hskip 1em\relax Legibility and accidental obfuscation}}{14}{section*.4}%
+\contentsline {section}{\tocsection {}{6}{Setting: a channel, a public frame, and monitors}}{14}{section.6}%
+\contentsline {subsection}{\tocsubsection {}{6.1}{The model}}{15}{subsection.6.1}%
+\contentsline {subsection}{\tocsubsection {}{6.2}{What we measure}}{15}{subsection.6.2}%
+\contentsline {section}{\tocsection {}{7}{Theory: the legible critical point}}{15}{section.7}%
+\contentsline {subsection}{\tocsubsection {}{7.1}{What privileges the public frame}}{15}{subsection.7.1}%
+\contentsline {subsection}{\tocsubsection {}{7.2}{Stationarity in leak directions}}{16}{subsection.7.2}%
+\contentsline {subsection}{\tocsubsection {}{7.3}{Envelope curvature: the I-MMSE formula}}{16}{subsection.7.3}%
+\contentsline {subsection}{\tocsubsection {}{7.4}{What gradient descent actually sees: the handshake}}{17}{subsection.7.4}%
+\contentsline {section}{\tocsection {}{8}{Experiments: drift, optimizers, and the saddle}}{17}{section.8}%
+\contentsline {subsection}{\tocsubsection {}{8.1}{E10: what happens to a legible code}}{17}{subsection.8.1}%
+\contentsline {subsection}{\tocsubsection {}{8.2}{E11: the update rule}}{18}{subsection.8.2}%
+\contentsline {subsection}{\tocsubsection {}{8.3}{E15: superposition removes the critical point}}{20}{subsection.8.3}%
+\contentsline {subsection}{\tocsubsection {}{8.4}{E13: how flat is the legible critical point?}}{20}{subsection.8.4}%
+\contentsline {section}{\tocsection {}{9}{What this means for monitoring}}{22}{section.9}%
+\contentsline {subsection}{\tocsubsection {}{}{Predictions for latent-reasoning models}}{22}{section*.5}%
+\contentsline {section}{\tocsection {}{10}{Status ledger}}{23}{section.10}%
+\contentsline {section}{\tocsection {Appendix}{A}{Reproducing these notes}}{24}{appendix.A}%
+\contentsline {section}{\tocsection {Appendix}{B}{Corrections to earlier drafts}}{24}{appendix.B}%
+\contentsline {section}{\tocsection {Appendix}{C}{How these notes were made, in more detail}}{25}{appendix.C}%
+\contentsline {section}{\tocsection {Appendix}{}{References}}{26}{section*.6}%

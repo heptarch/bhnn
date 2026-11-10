@@ -1,0 +1,5 @@
+/home/claude/bhi/experiments/e13_saddle_hessian.py:124: RuntimeWarning: invalid value encountered in log
+  f"{np.corrcoef(np.log(-lam_b + 1e-15), np.log(mm + 1e-15))[0, 1]:.2f} "
+sigma=0.1: empties=4 |g|within=5.9e-09 |g|leak-empty=3.8e-10 |g|leak-occupied=1.1e-09 lam_global=-4.64e-10 vec={'leak_empty': 0.04, 'leak_occupied': 0.43, 'sender_support': 0.0, 'receiver_read_empty': 0.01, 'receiver_other': 0.52} block lam [-2.92e-11,1.83e-12] corr(log|lam|,log mmse)=nan median schur/immse=-4140814.46 [435s]
+sigma=0.4: empties=4 |g|within=1.4e-07 |g|leak-empty=8.9e-08 |g|leak-occupied=3.1e-08 lam_global=-5.73e-08 vec={'leak_empty': 0.38, 'leak_occupied': 0.01, 'sender_support': 0.24, 'receiver_read_empty': 0.08, 'receiver_other': 0.29} block lam [1.83e-09,1.84e-09] corr(log|lam|,log mmse)=nan median schur/immse=-16642862.84 [904s]
+sigma=0.9: empties=4 |g|within=2.5e-03 |g|leak-empty=2.1e-02 |g|leak-occupied=2.0e-05 lam_global=-2.24e-02 vec={'leak_empty': 0.85, 'leak_occupied': 0.0, 'sender_support': 0.02, 'receiver_read_empty': 0.03, 'receiver_other': 0.1} block lam [-2.82e-04,5.25e-04] corr(log|lam|,log mmse)=nan median schur/immse=-0.31 [1437s]
